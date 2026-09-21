@@ -16,8 +16,8 @@ public:
     void printIndoor(float temperature, float humidity, float pressure);
     void printOutdoor(float temperature, float humidity, float pressure);
     void printBattery();
-    uint16_t screenWidth() const;
-    uint16_t screenHeight() const;
+    uint16_t screenWidth() const noexcept;
+    uint16_t screenHeight() const noexcept;
 
 
     template <typename... Args>
@@ -106,11 +106,9 @@ public:
     }
 
 private:
-    void printNumberLabeled(float value, int integerPartPadding, const char* label);
     void alignCursorCenter(int width);
     void alignCursorLeft();
     void alignCursorRight(int width);
-    void printReadings(const char* label, int16_t y, float temperature, float humidity, float pressure);
 
     GxEPD2_BW<DISPLAY_CLASS, DISPLAY_CLASS::HEIGHT> mDriver;
     U8G2_FOR_ADAFRUIT_GFX mU8g2Fonts;
