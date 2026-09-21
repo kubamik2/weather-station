@@ -64,7 +64,7 @@ Router& Router::getInstance() {
     return router;
 }
 
-void Router::setLastReading(const uint8_t sensorId, const Readings readings) {
+void Router::setLastReading(const uint8_t sensorId, Readings readings) {
     Router::getInstance().mLastReadings[sensorId] = std::move(readings);
 }
 

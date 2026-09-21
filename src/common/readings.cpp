@@ -94,3 +94,7 @@ void Readings::setReading(std::string readingName, float value) {
     }
     mReadings.push_back({readingName, value});
 }
+
+void Readings::clear() noexcept {
+    mReadings.clear();
+}
