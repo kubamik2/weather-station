@@ -2,6 +2,7 @@
 #include "SPI.h"
 #include "common/communication.h"
 #include "common/readings.h"
+#include "monitor/battery.h"
 #include "monitor/display.h"
 #include "monitor/ui/ui.h"
 #include "ui/reading_templates/humidity.h"
@@ -12,6 +13,7 @@ int cnt;
 
 Adafruit_BME280 bme;
 Display display;
+Battery battery;
 
 RTC_DATA_ATTR bool first_boot = true;
 static std::array<uint8_t, ESP_NOW_ETH_ALEN> ROUTER_ADDRESS = {0x10, 0xBD, 0xA3, 0x9D, 0x44, 0xC8};
@@ -25,8 +27,7 @@ void setup() {
     ui::UIElement::ReadingsList::setTemplate("pressure", PRESSURE_READING_TEMPLATE);
     SPI.begin();
     Serial.begin(9600);
-    pinMode(D6, INPUT_PULLUP);
-    pinMode(LED_BUILTIN, OUTPUT);
+    battery.begin();
 
     if (endDevice.init(ROUTER_ADDRESS, 1) != ESP_OK) {
         Serial.println("ESP-NOW: couldn't initialize");
@@ -49,7 +50,7 @@ void setup() {
     esp_sleep_enable_timer_wakeup(60 * 1000000ULL);
     display.begin(first_boot);
     if (first_boot) {
-        delay(2000);
+        delay(1000);
     }
     first_boot = false;
 }
@@ -67,14 +68,6 @@ void loop() {
         Serial.println("EndDevice: failed to send readings");
     }
 
-    uint32_t Vbatt = 0;
-    for (int i = 0; i < 16; i++) {
-        Vbatt = Vbatt + analogReadMilliVolts(A0); // ADC with correction
-    }
-    float Vbattf = 2.0 * Vbatt / 16 / 1000.0;
-    char s[16];
-    snprintf(s, 16, "%.1f", Vbattf);
-
     if (endDevice.requestReadings(0) != ESP_OK) {
         Serial.println("EndDevice: failed to send request");
     }
@@ -90,7 +83,7 @@ void loop() {
     }
 
     ui::UIBuilder ui;
-    ui.setHeader(100.0f).setPrimary("Indoor", std::move(readings));
+    ui.setHeader(battery.percentage()).setPrimary("Indoor", std::move(readings));
     if (r) {
         readings = std::move(r.value());
         ui.setSecondary("Outdoor", std::move(r.value()));
