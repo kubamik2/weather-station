@@ -64,6 +64,8 @@ public:
 
     private:
         static constexpr int16_t BATTERY_SYMBOL_OFFSET[2] = {2, 10};
+        static constexpr int16_t WIDTH = 128;
+        static constexpr int16_t HEIGHT = 20;
         float batteryPercentage;
     };
 

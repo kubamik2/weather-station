@@ -8,12 +8,16 @@
 #include "ui/reading_templates/humidity.h"
 #include "ui/reading_templates/pressure.h"
 #include "ui/reading_templates/temperature.h"
+#include <cstdint>
 
 int cnt;
 
 Adafruit_BME280 bme;
 Display display;
 Battery battery;
+
+RTC_DATA_ATTR uint8_t partialRefreshes = 0;
+static const uint8_t MAX_PARTIAL_REFRESHES = 10;
 
 RTC_DATA_ATTR bool first_boot = true;
 static std::array<uint8_t, ESP_NOW_ETH_ALEN> ROUTER_ADDRESS = {0x10, 0xBD, 0xA3, 0x9D, 0x44, 0xC8};
@@ -92,7 +96,12 @@ void loop() {
         ui.setSecondary("Outdoor DOWN", empty);
     }
 
-    ui.printFull(display);
+    if (partialRefreshes++ >= MAX_PARTIAL_REFRESHES) {
+        ui.printFull(display);
+        partialRefreshes = 0;
+    } else {
+        ui.printPartial(display);
+    }
 
     display.hibernate();
     esp_deep_sleep_start();

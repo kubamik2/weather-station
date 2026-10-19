@@ -55,6 +55,7 @@ void ui::UIBuilder::printPartial(Display &display) {
     display.setPartialWindow(
         mUpperLeft[0], mUpperLeft[1], mLowerRight[0] - mUpperLeft[0] + 1, mLowerRight[1] - mUpperLeft[1] + 1
     );
+    Serial.printf("%d, %d, %d, %d\n", mUpperLeft[0], mUpperLeft[1], mLowerRight[0], mLowerRight[1]);
     display.firstPage();
     do {
         mPrimaryReadings.draw(display, PRIMARY_READINGS_POS[0], PRIMARY_READINGS_POS[1]);
@@ -106,13 +107,13 @@ void ui::UIBuilder::printFull(Display &display) {
 
 int16_t ui::UIElement::getHeight() {
     int16_t result;
-    ENUM_FORWARD(getHeight)
+    ENUM_FORWARD_RETURNING(getHeight)
     return result;
 }
 
 int16_t ui::UIElement::getWidth() {
     int16_t result;
-    ENUM_FORWARD(getWidth)
+    ENUM_FORWARD_RETURNING(getWidth)
     return result;
 }
 
@@ -177,11 +178,11 @@ void ui::UIElement::ReadingsList::setTemplate(const char *readingName, ReadingTe
 }
 
 int16_t ui::UIElement::Header::getWidth() {
-    return 0;
+    return WIDTH;
 }
 
 int16_t ui::UIElement::Header::getHeight() {
-    return 0;
+    return HEIGHT;
 }
 
 void ui::UIElement::Header::draw(Display &display, int16_t x, int16_t y) {
