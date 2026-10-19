@@ -16,11 +16,10 @@ void Display::begin(bool clear) {
 
     mDriver.setTextColor(GxEPD_BLACK);
     mDriver.setRotation(0); // Vertical orientation
-    mU8g2Fonts.setFontDirection(0); 
+    mU8g2Fonts.setFontDirection(0);
     mU8g2Fonts.setFontMode(1);
     mU8g2Fonts.setForegroundColor(GxEPD_BLACK);
     mU8g2Fonts.setBackgroundColor(GxEPD_WHITE);
-
 
     mU8g2Fonts.setFont(LARGE_FONT);
     mLargeFontWidth = mU8g2Fonts.getUTF8Width(" ");

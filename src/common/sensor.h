@@ -1,6 +1,6 @@
 #pragma once
-#include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
+#include <Adafruit_Sensor.h>
 #include <cstdint>
 
 class Sensor {
@@ -13,6 +13,7 @@ public:
 
     Sensor(float height);
     Readings getReadings();
+
 private:
     Adafruit_BME280 mBME;
     float mHeight;

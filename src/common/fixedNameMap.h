@@ -4,15 +4,15 @@
 #include <cstring>
 #include <optional>
 
-template<typename Item, const size_t MAX_NAME_SIZE, const size_t SIZE>
-class FixedNameMap {
+template <typename Item, const size_t MAX_NAME_SIZE, const size_t SIZE> class FixedNameMap {
 public:
     typedef struct {
         std::array<char, MAX_NAME_SIZE> name;
         Item item;
     } KeyValuePair;
 
-    FixedNameMap() {}
+    FixedNameMap() {
+    }
 
     bool isFull() const noexcept {
         mItems.size() == SIZE;
@@ -34,7 +34,7 @@ public:
         }
     }
 
-    std::optional<Item*> get(const char *name) noexcept {
+    std::optional<Item *> get(const char *name) noexcept {
         if (auto index = findIndex(name)) {
             return &mItems[index.value()].item;
         } else {
@@ -42,7 +42,7 @@ public:
         }
     }
 
-    std::optional<const Item*> get(const char *name) const noexcept {
+    std::optional<const Item *> get(const char *name) const noexcept {
         if (auto index = findIndex(name)) {
             return &mItems[index.value()].item;
         } else {
@@ -50,19 +50,19 @@ public:
         }
     }
 
-    KeyValuePair* begin() noexcept {
+    KeyValuePair *begin() noexcept {
         return mItems.begin();
     }
 
-    KeyValuePair* end() noexcept {
+    KeyValuePair *end() noexcept {
         return mItems.end();
     }
 
-    const KeyValuePair* cbegin() const noexcept {
+    const KeyValuePair *cbegin() const noexcept {
         return mItems.cbegin();
     }
 
-    const KeyValuePair* cend() const noexcept {
+    const KeyValuePair *cend() const noexcept {
         return mItems.cend();
     }
 

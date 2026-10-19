@@ -2,10 +2,11 @@
 #include <array>
 #include <cstddef>
 
-template<typename Item, const size_t SIZE>
-class FixedVector {
+template <typename Item, const size_t SIZE> class FixedVector {
 public:
-    FixedVector() : mSize(0) {}
+    FixedVector()
+        : mSize(0) {
+    }
 
     bool pushBack(Item item) {
         if (mSize >= SIZE) {
@@ -25,27 +26,27 @@ public:
         return mSize;
     }
 
-    Item& operator[](size_t index) {
+    Item &operator[](size_t index) {
         return mItems[index];
     }
 
-    const Item& operator[](size_t index) const {
+    const Item &operator[](size_t index) const {
         return mItems[index];
     }
 
-    Item* begin() noexcept {
+    Item *begin() noexcept {
         return mItems.begin();
     }
 
-    Item* end() noexcept {
+    Item *end() noexcept {
         return &mItems[mSize];
     }
 
-    const Item* cbegin() const noexcept {
+    const Item *cbegin() const noexcept {
         return mItems.cbegin();
     }
 
-    const Item* cend() const noexcept {
+    const Item *cend() const noexcept {
         return &mItems[mSize];
     }
 

@@ -1,8 +1,7 @@
 #include "sensor.h"
-#include <optional>
 
-Sensor::Sensor(float height) : mHeight(height) {
-    
+Sensor::Sensor(float height)
+    : mHeight(height) {
 }
 
 Sensor::Readings Sensor::getReadings() {

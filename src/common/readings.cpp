@@ -1,4 +1,4 @@
-#include "readings.h" 
+#include "readings.h"
 #include "HardwareSerial.h"
 #include <cstddef>
 #include <cstdint>
@@ -13,13 +13,16 @@ std::optional<size_t> Readings::serialize(uint8_t *dest, size_t maxSize) const {
         return {};
     }
 
-    *(size_t*)dest = mMap.size();
+    *(size_t *)dest = mMap.size();
 
     size_t i = sizeof(size_t);
 
     // Serialize
     for (auto it = mMap.cbegin(); it != mMap.cend(); it++) {
-        union { float v; uint8_t arr[4]; } u;
+        union {
+            float v;
+            uint8_t arr[4];
+        } u;
         u.v = it->item;
         for (size_t j = 0; j < sizeof(float); j++) {
             dest[i++] = u.arr[j];
@@ -39,7 +42,7 @@ std::optional<Readings> Readings::deserialize(const uint8_t *data, const size_t 
     }
 
     Readings readings;
-    size_t readingCount = *(size_t*)data;
+    size_t readingCount = *(size_t *)data;
 
     size_t requiredBytes = sizeof(size_t) + readingCount * (sizeof(char) * MAX_READING_NAME_SIZE + sizeof(float));
 
@@ -52,7 +55,10 @@ std::optional<Readings> Readings::deserialize(const uint8_t *data, const size_t 
 
     char buf[MAX_READING_NAME_SIZE];
     // deserialize
-    union { float v; uint8_t arr[4]; } u;
+    union {
+        float v;
+        uint8_t arr[4];
+    } u;
     size_t currentByte = sizeof(size_t);
     for (int i = 0; i < readingCount; i++) {
         for (int j = 0; j < sizeof(float); j++) {
@@ -74,14 +80,16 @@ std::optional<float> Readings::getReading(const char *readingName) const {
     }
 }
 
-bool Readings::setReading(const char* readingName, float value) {
+bool Readings::setReading(const char *readingName, float value) {
     return mMap.set(readingName, value);
 }
 
-const FixedNameMap<float, Readings::MAX_READING_NAME_SIZE, Readings::MAX_READINGS>::KeyValuePair* Readings::cbegin() const {
+const FixedNameMap<float, Readings::MAX_READING_NAME_SIZE, Readings::MAX_READINGS>::KeyValuePair *
+Readings::cbegin() const {
     return mMap.cbegin();
 }
 
-const FixedNameMap<float, Readings::MAX_READING_NAME_SIZE, Readings::MAX_READINGS>::KeyValuePair* Readings::cend() const {
+const FixedNameMap<float, Readings::MAX_READING_NAME_SIZE, Readings::MAX_READINGS>::KeyValuePair *
+Readings::cend() const {
     return mMap.cend();
 }

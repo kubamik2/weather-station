@@ -1,17 +1,18 @@
-#pragma once 
+#pragma once
 
-#include <Arduino.h>
-#include <Adafruit_GFX.h>
-#include <GxEPD2_BW.h>
-#include <U8g2_for_Adafruit_GFX.h>
-#include <SPI.h>
-#include <cstdint>
 #include "common.h"
-
+#include <Adafruit_GFX.h>
+#include <Arduino.h>
+#include <GxEPD2_BW.h>
+#include <SPI.h>
+#include <U8g2_for_Adafruit_GFX.h>
+#include <cstdint>
 
 class Display {
 public:
-    Display() : mDriver(DISPLAY_CLASS { CS, DC, RST, BUSY } ) {}
+    Display()
+        : mDriver(DISPLAY_CLASS{CS, DC, RST, BUSY}) {
+    }
     void begin(bool clear);
     void printIndoor(float temperature, float humidity, float pressure);
     void printOutdoor(float temperature, float humidity, float pressure);
@@ -19,15 +20,12 @@ public:
     uint16_t screenWidth() const noexcept;
     uint16_t screenHeight() const noexcept;
 
-
-    template <typename... Args>
-    void printf(const char *format, Args&&... args) {
+    template <typename... Args> void printf(const char *format, Args &&...args) {
         mU8g2Fonts.printf(format, std::forward<Args>(args)...);
     }
 
-    template <typename... Args>
-    void printfCenter(const char *format, Args&&... args) {
-        #define MAX_LEN 64
+    template <typename... Args> void printfCenter(const char *format, Args &&...args) {
+        static const size_t MAX_LEN = 64;
         char str[MAX_LEN];
         snprintf(str, MAX_LEN, format, std::forward<Args>(args)...);
         int16_t width = getUTF8Width(str);
@@ -35,9 +33,9 @@ public:
         print(str);
     }
 
-    void printCenter(const char* str);
+    void printCenter(const char *str);
 
-    void print(const char* str) {
+    void print(const char *str) {
         mU8g2Fonts.print(str);
     }
 
@@ -73,7 +71,7 @@ public:
         mDriver.setFullWindow();
     }
 
-    int16_t getUTF8Width(const char* str) {
+    int16_t getUTF8Width(const char *str) {
         return mU8g2Fonts.getUTF8Width(str);
     }
 

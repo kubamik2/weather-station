@@ -1,5 +1,18 @@
 BasedOnStyle: LLVM
+ColumnLimit: 120
+
+# Indenting
 IndentWidth: 4
 TabWidth: 4
-UseTab: Never
 AccessModifierOffset: -4
+UseTab: Never
+
+AlignAfterOpenBracket: BlockIndent
+
+# Ctor init list
+BreakConstructorInitializers: BeforeComma
+PackConstructorInitializers: Never
+
+# Functions
+BinPackParameters: false # Don't pack function parameters
+AllowShortFunctionsOnASingleLine: None # No one lined functions
