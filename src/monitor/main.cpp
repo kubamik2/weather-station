@@ -2,8 +2,11 @@
 #include "Adafruit_BME280.h"
 #include "common/readings.h"
 #include "monitor/display.h"
-#include "monitor/ui.h"
+#include "monitor/ui/ui.h"
 #include "common/communication.h"
+#include "ui/reading_templates/temperature.h"
+#include "ui/reading_templates/pressure.h"
+#include "ui/reading_templates/humidity.h"
 
 #define TEMP_HUM_ENDPOINT 1
 #define PRESSURE_ENDPOINT 2
@@ -13,14 +16,6 @@ int cnt;
 Adafruit_BME280 bme;
 Display display;
 
-// uint32_t debounceTime = 30;
-// uint32_t lastDebounce = 0;
-// uint32_t lastButtonState = 0;
-// uint32_t buttonState = 0;
-
-uint32_t lastDisplayRefresh = 10000;
-#define BUTTON_PIN_BITMASK (1ULL << D6)
-
 RTC_DATA_ATTR bool first_boot = true;
 static std::array<uint8_t, ESP_NOW_ETH_ALEN> ROUTER_ADDRESS = {0x10, 0xBD, 0xA3, 0x9D, 0x44, 0xC8};
 esp_now_peer_info_t peerInfo;
@@ -28,6 +23,9 @@ esp_now_peer_info_t peerInfo;
 EndDevice& endDevice = EndDevice::getInstance();
 
 void setup() {
+  ui::UIElement::ReadingsList::setTemplate("temperature", TEMPERATURE_READING_TEMPLATE);
+  ui::UIElement::ReadingsList::setTemplate("humidity", HUMIDITY_READING_TEMPLATE);
+  ui::UIElement::ReadingsList::setTemplate("pressure", PRESSURE_READING_TEMPLATE);
   SPI.begin();
   Serial.begin(9600);
   pinMode(D6, INPUT_PULLUP);
@@ -68,18 +66,6 @@ void loop() {
   if (endDevice.sendReadings(readings) != ESP_OK) {
     Serial.println("EndDevice: failed to send readings");
   }
-
-  // int reading = !digitalRead(D6);
-  // if (reading != lastButtonState) {
-  //   lastDebounce = millis();
-  // }
-  //
-  // if ((millis() - lastDebounce) > debounceTime) {
-  //   if (reading == HIGH && buttonState == LOW) {
-  //     cnt++;
-  //   }
-  //   buttonState = reading;
-  // }
   
   uint32_t Vbatt = 0;
   for(int i = 0; i < 16; i++) {
@@ -103,23 +89,20 @@ void loop() {
     delay(50);
   }
 
-  UIBuilder ui;
+  ui::UIBuilder ui;
   ui
-    .withHeader(100.0f)
-    .withPrimary("Indoor", temp, humidity, pressure);
+    .setHeader(100.0f)
+    .setPrimary("Indoor", std::move(readings));
   if (r) {
     readings = std::move(r.value());
-    ui.withSecondary("Outdoor", readings.getReading("temperature").value(), readings.getReading("humidity").value(), readings.getReading("pressure").value());
+    ui.setSecondary("Outdoor", std::move(r.value()));
   } else {
-    ui.withSecondary("Outdoor", 0.0, 0.0, 0.0);
+    Readings empty;
+    ui.setSecondary("Outdoor DOWN", empty);
   }
 
   ui.printFull(display);
 
   display.hibernate();
   esp_deep_sleep_start();
-
-  // delay(10000);
-
-  // lastButtonState = reading;
 }

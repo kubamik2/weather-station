@@ -6,6 +6,8 @@
 #include "esp_now.h"
 #include "readings.h"
 
+static constexpr size_t MAX_MESSAGE_SIZE = 250;
+
 enum class EndDeviceMessageType : uint8_t {
     SendReadings,
     RequestReadings,

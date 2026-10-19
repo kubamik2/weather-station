@@ -11,7 +11,7 @@
 
 class Display {
 public:
-    Display();
+    Display() : mDriver(DISPLAY_CLASS { CS, DC, RST, BUSY } ) {}
     void begin(bool clear);
     void printIndoor(float temperature, float humidity, float pressure);
     void printOutdoor(float temperature, float humidity, float pressure);
@@ -103,6 +103,10 @@ public:
 
     void hibernate() {
         mDriver.hibernate();
+    }
+
+    void drawGlyph(int16_t x, int16_t y, uint16_t e) {
+        mU8g2Fonts.drawGlyph(x, y, e);
     }
 
 private:

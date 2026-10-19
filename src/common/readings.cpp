@@ -1,100 +1,87 @@
 #include "readings.h" 
+#include "HardwareSerial.h"
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
-#include <vector>
 
-std::vector<uint8_t> Readings::toBytes() const {
-    size_t bytes = 0;
+std::optional<size_t> Readings::serialize(uint8_t *dest, size_t maxSize) const {
     // Calculate needed amount of bytes for serialization
-    for (auto const &[name, _] : mReadings) {
-        //                    v null byte
-        bytes += name.length() + 1 + sizeof(float);
-    }
+    size_t bytes = sizeof(size_t) + mMap.size() * (sizeof(char) * MAX_READING_NAME_SIZE + sizeof(float));
 
-    std::vector<uint8_t> data;
-    data.resize(bytes);
-    size_t i = 0;
-
-    // Serialize
-    for (auto const &[name, value] : mReadings) {
-        union { float v; uint8_t arr[4]; } u;
-        u.v = value;
-        for (size_t j = 0; j < sizeof(float); j++) {
-            data[i++] = u.arr[j];
-        }
-
-        memcpy(&data[i], name.data(), name.length());
-        i += name.length();
-        data[i++] = '\0';
-    }
-
-    return data;
-}
-
-std::optional<Readings> Readings::fromBytes(const uint8_t *data, const size_t length) {
-    enum class State {
-        ReadValue,
-        ReadName,
-        ReadNameEnd, // Only valid final state
-    };
-    Readings readings;
-    std::string name;
-    union { float f; uint8_t arr[4]; } value;
-    size_t i = 0;
-    State state = State::ReadValue;
-
-    // Deserialize using a state machine
-    for (size_t j = 0; j < length; j++) {
-        uint8_t byte = *(data++);
-        switch (state) {
-            case State::ReadNameEnd:
-                state = State::ReadValue;
-            case State::ReadValue:
-                value.arr[i++] = byte;
-                if (i == sizeof(float)) {
-                    i = 0;
-                    state = State::ReadName;
-                }
-                break;
-            case State::ReadName:
-                if (byte == '\0') {
-                    state = State::ReadNameEnd;
-                    readings.setReading(std::move(name), value.f);
-                    name = "";
-                } else {
-                    name.push_back(byte);
-                }
-                break;
-        }
-    }
-
-    if (state != State::ReadNameEnd) {
+    if (bytes > maxSize) {
         return {};
     }
+
+    *(size_t*)dest = mMap.size();
+
+    size_t i = sizeof(size_t);
+
+    // Serialize
+    for (auto it = mMap.cbegin(); it != mMap.cend(); it++) {
+        union { float v; uint8_t arr[4]; } u;
+        u.v = it->item;
+        for (size_t j = 0; j < sizeof(float); j++) {
+            dest[i++] = u.arr[j];
+        }
+
+        memcpy(&dest[i], it->name.data(), MAX_READING_NAME_SIZE);
+        i += MAX_READING_NAME_SIZE;
+    }
+
+    return bytes;
+}
+
+std::optional<Readings> Readings::deserialize(const uint8_t *data, const size_t length) {
+    // Check if readingCount can be read
+    if (length < sizeof(size_t)) {
+        return {};
+    }
+
+    Readings readings;
+    size_t readingCount = *(size_t*)data;
+
+    size_t requiredBytes = sizeof(size_t) + readingCount * (sizeof(char) * MAX_READING_NAME_SIZE + sizeof(float));
+
+    // Validate size
+    if (length != requiredBytes) {
+        Serial.printf("length: %d, required: %d\n", length, requiredBytes);
+        Serial.printf("readingCount: %d\n", readingCount);
+        return {};
+    }
+
+    char buf[MAX_READING_NAME_SIZE];
+    // deserialize
+    union { float v; uint8_t arr[4]; } u;
+    size_t currentByte = sizeof(size_t);
+    for (int i = 0; i < readingCount; i++) {
+        for (int j = 0; j < sizeof(float); j++) {
+            u.arr[j] = data[currentByte++];
+        }
+        memcpy(buf, &data[currentByte], MAX_READING_NAME_SIZE);
+        currentByte += MAX_READING_NAME_SIZE;
+        readings.mMap.set(buf, u.v);
+    }
+
     return readings;
 }
 
 std::optional<float> Readings::getReading(const char *readingName) const {
-    for (auto const &[name, value] : mReadings) {
-        if (name.compare(readingName) == 0) {
-            return value;
-        }
+    if (auto currentValue = mMap.get(readingName)) {
+        return *currentValue.value();
+    } else {
+        return {};
     }
-    return {};
 }
 
-void Readings::setReading(std::string readingName, float value) {
-    for (auto &[name, currentValue] : mReadings) {
-        if (name.compare(readingName) == 0) {
-            currentValue = value;
-            return;
-        }
-    }
-    mReadings.push_back({readingName, value});
+bool Readings::setReading(const char* readingName, float value) {
+    return mMap.set(readingName, value);
 }
 
-void Readings::clear() noexcept {
-    mReadings.clear();
+const FixedNameMap<float, Readings::MAX_READING_NAME_SIZE, Readings::MAX_READINGS>::KeyValuePair* Readings::cbegin() const {
+    return mMap.cbegin();
+}
+
+const FixedNameMap<float, Readings::MAX_READING_NAME_SIZE, Readings::MAX_READINGS>::KeyValuePair* Readings::cend() const {
+    return mMap.cend();
 }

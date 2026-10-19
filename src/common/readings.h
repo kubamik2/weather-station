@@ -1,26 +1,22 @@
 #pragma once
 
 #include <optional>
-#include <vector>
-#include <tuple>
 #include <cstdint>
-#include <string>
+#include "fixedNameMap.h"
 
 class Readings {
 public:
-    Readings();
-    static std::optional<Readings> fromBytes(const uint8_t *data, const size_t length);
+    static constexpr size_t MAX_READINGS = 8;
+    static constexpr size_t MAX_READING_NAME_SIZE = 16;
 
-    Readings(const Readings&) = delete;
-    Readings& operator=(const Readings&) = delete;
+    Readings() {}
+    static std::optional<Readings> deserialize(const uint8_t *data, const size_t length);
+    std::optional<size_t> serialize(uint8_t *dest, size_t maxSize) const;
 
-    Readings& operator=(Readings&&);
-    Readings(Readings&&);
-
-    void setReading(std::string readingName, float value);
+    bool setReading(const char* readingName, float value);
     std::optional<float> getReading(const char *readingName) const;
-    std::vector<uint8_t> toBytes() const;
-    void clear() noexcept;
+    const FixedNameMap<float, MAX_READING_NAME_SIZE, MAX_READINGS>::KeyValuePair* cbegin() const;
+    const FixedNameMap<float, MAX_READING_NAME_SIZE, MAX_READINGS>::KeyValuePair* cend() const;
 private:
-    std::vector<std::tuple<std::string, float>> mReadings;
+    FixedNameMap<float, MAX_READING_NAME_SIZE, MAX_READINGS> mMap;
 };
