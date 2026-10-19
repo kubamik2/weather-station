@@ -1,6 +1,5 @@
 #pragma once
 
-#include "common.h"
 #include <Adafruit_GFX.h>
 #include <Arduino.h>
 #include <GxEPD2_BW.h>
@@ -8,6 +7,14 @@
 #include <U8g2_for_Adafruit_GFX.h>
 #include <cstdint>
 
+#define CS D1
+#define DC D3
+#define RST D0
+#define BUSY D2
+#define SCK D8
+#define MOSI D10
+
+#define DISPLAY_CLASS GxEPD2_290_T94_V2
 class Display {
 public:
     Display()
