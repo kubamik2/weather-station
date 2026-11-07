@@ -30,8 +30,8 @@ static constexpr ui::ReadingTemplate HUMIDITY_READING_TEMPLATE = {
             0,  0,  0,   0,   0,   0, 0, 0, 0,  0,  0,   0,   0,   0, 0, 0, 0,  0,  0,   0,   0,   0, 0, 0,
             0,  0,  0,   0,   0,   0, 0, 0, 0,  0,  0,   0,   0,   0, 0, 0
         };
-        display.setCursor(x + 53, y + 26);
-        ui::printNumber(display, value, 2);
+        display.setCursor(x + 37, y + 26);
+        ui::printNumber(display, value, 3);
         display.drawBitmap(x, y, bitmap, 128, 31, 0);
     },
 };
